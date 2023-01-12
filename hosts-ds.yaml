@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: etc-hosts
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      kubernetes.io/os: linux
+      app: etc-hosts
+  template:
+    metadata:
+       labels:
+          kubernetes.io/os: linux
+          app: etc-hosts
+    spec:
+      nodeSelector:
+        kubernetes.io/os: linux
+      containers:
+      - image: mcr.microsoft.com/oss/nginx/nginx:1.13.12-alpine
+        imagePullPolicy: Never
+        name: etc-hosts
+        resources: {}
+        volumeMounts:
+        - mountPath: /host
+          name: host-root
+        command: ["/bin/sh", "-c"]
+        args:
+          - chroot /host /bin/bash -c "echo \"#################################\"; echo -n \"$(hostname) is using \" && grep nameserver /etc/resolv.conf ; sleep infinity" 
+        securityContext:
+          privileged: true
+      hostIPC: true
+      hostNetwork: true
+      hostPID: true
+      preemptionPolicy: PreemptLowerPriority
+      priority: 0      
+      volumes:
+      - hostPath:
+          path: /
+          type: ""
+        name: host-root
