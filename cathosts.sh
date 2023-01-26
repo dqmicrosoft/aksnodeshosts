@@ -8,14 +8,14 @@ echo "Pods are now being deployed"
 while true
 do
 
-  ready=true
+  creating=true
 
   for i in $(kubectl get pods | grep etc-hosts | grep -iv name | awk '{print $1}')
   do
 
     if [ $(kubectl get pod $i | grep -iv status | awk '{print $3}') != "Running" ]
     then
-      ready=false
+      creating=false
     fi
   done
 
